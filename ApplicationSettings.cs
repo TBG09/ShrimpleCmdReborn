@@ -9,10 +9,10 @@ namespace ShrimpleCmd.dev
     {
 
 
-        public static string Version = "1.0.0";
+        public static string Version = "0.0.1";
         public static string ExecutableLocation = AppDomain.CurrentDomain.BaseDirectory;
 
-        public static string Build = "0002";
+        public static string Build = "0029";
         public static string CurrentDirectory = Directory.GetCurrentDirectory();
 
         public static string ConfigLocation = ExecutableLocation + "\\shrimple-settings.json";

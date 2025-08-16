@@ -2,7 +2,7 @@
 using ShrimpleCmd;
 using ShrimpleCmd.dev;
 
-namespace StartShrimple
+namespace ShrimpleCmd
 {
     public class Program
     {
@@ -10,7 +10,7 @@ namespace StartShrimple
         {
             utils.println(ApplicationSettings.ascii_icon);
             ShrimpleCmd.dev.ApplicationSettings.args = args;
-            ShrimpleCmd.Main.main();
+            ShrimpleCmd.Startup.main();
         }
     }
 }

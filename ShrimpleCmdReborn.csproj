@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <ApplicationIcon>shrimple.ico</ApplicationIcon>
     <AssemblyName>ShrimpleCmd</AssemblyName>
+    <AssemblyVersion>0.0.1</AssemblyVersion>
     <Company>Dominic</Company>
   </PropertyGroup>
     <Target Name="PrintCompilingFiles" BeforeTargets="CoreCompile">
@@ -14,5 +15,6 @@
     </Target>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Spectre.Console" Version="0.50.0" />
   </ItemGroup>
 </Project>

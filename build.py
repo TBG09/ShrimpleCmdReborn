@@ -49,10 +49,10 @@ else:
 # 7. Execute the dotnet command
 if command == "build":
     print("Building...")
-    subprocess.run(["dotnet", "build"])
+    subprocess.run(["dotnet", "build", "-v", "d"])
 elif command == "run":
     print("Running...")
-    subprocess.run(["dotnet", "run"])
+    subprocess.run(["dotnet", "run","-v", "d"])
 else:
     print(f"Error: Unknown command '{command}'")
     sys.exit(1)
