@@ -1,0 +1,17 @@
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\ShrimpleCmdReborn.csproj.AssemblyReference.cache
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\ShrimpleCmdReborn.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\ShrimpleCmdReborn.AssemblyInfoInputs.cache
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\ShrimpleCmdReborn.AssemblyInfo.cs
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\ShrimpleCmdReborn.csproj.CoreCompileInputs.cache
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\bin\Debug\net9.0\Newtonsoft.Json.dll
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\Shrimple.ECAB100B.Up2Date
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\ShrimpleCmdReborn.genruntimeconfig.cache
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\bin\Debug\net9.0\ShrimpleCmd.exe
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\bin\Debug\net9.0\ShrimpleCmd.deps.json
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\bin\Debug\net9.0\ShrimpleCmd.runtimeconfig.json
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\bin\Debug\net9.0\ShrimpleCmd.dll
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\bin\Debug\net9.0\ShrimpleCmd.pdb
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\ShrimpleCmd.dll
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\refint\ShrimpleCmd.dll
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\ShrimpleCmd.pdb
+C:\Users\domin\Desktop\Projects\ShrimpleCmdReborn\obj\Debug\net9.0\ref\ShrimpleCmd.dll
