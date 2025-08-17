@@ -8,23 +8,24 @@ namespace ShrimpleCmd
     {
         public bool firstTime { set; get; }
         public bool debugMode { set; get; }
+        public string internalCommandPrefix { set; get; }
+        public bool enforcePrefix { set; get; }
 
-        public Settings(bool firstTime)
+        public Settings(bool first, bool debug, string internalprefix, bool enforcePre)
         {
-            this.firstTime = firstTime;
-        }
-        // easy way to retreive debug instead of typing the entire if statement
-        public bool getDebug(Settings settingsInstance)
-        {
-            return settingsInstance.debugMode;
+            this.firstTime = first;
+            this.debugMode = debug;
+            this.internalCommandPrefix = internalprefix;
+            this.enforcePrefix = enforcePre;
         }
 
-        public static Exception UpdateSettings(string configPath, Settings settings)
+
+        public static Exception UpdateSettings(string configPath)
         {
             try
             {
                 string json = File.ReadAllText(configPath);
-                Settings currentSettings = settings;
+                Settings currentSettings = new Settings(true, false, "!", true);
 
                 JsonConvert.PopulateObject(json, currentSettings);
                 File.WriteAllText(configPath, JsonConvert.SerializeObject(currentSettings, Formatting.Indented));

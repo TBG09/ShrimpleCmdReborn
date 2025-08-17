@@ -1,6 +1,8 @@
-namespace ShrimpleCmd
+
+
+namespace ShrimpleCmd.utils
 {
-    public class utils
+    public class util
     {
         public static void print(string msg)
         {
@@ -18,7 +20,7 @@ namespace ShrimpleCmd
         // what am i doing here?
         public static string getExceptionTy(Exception ex, Settings settings)
         {
-            if (settings.getDebug(settings))
+            if (settings.debugMode)
             {
                 return ex.ToString();
             }

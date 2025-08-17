@@ -4,7 +4,7 @@ import re
 import subprocess
 
 # The name of the file to modify
-CS_FILE = "ApplicationSettings.cs"
+CS_FILE = "src\\ApplicationSettings.cs"
 
 # Check for a command line argument
 if len(sys.argv) < 2:
