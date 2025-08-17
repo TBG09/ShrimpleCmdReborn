@@ -44,5 +44,5 @@ It should be built to bin/<configuration>/ as ShrimpleCmd.exe(or as an elf depen
 
 ## NuGet packages
 
-[**Newtonsoft.Json**](https://www.nuget.org/packages/newtonsoft.json/)
+[**Newtonsoft.Json**](https://www.nuget.org/packages/newtonsoft.json/)   
 [**Spectre.Console**](https://www.nuget.org/packages/spectre.console/)
