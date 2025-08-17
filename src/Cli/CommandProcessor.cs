@@ -18,7 +18,7 @@ namespace ShrimpleCmd.cli
         {
             util.println(ApplicationSettings.ascii_icon);
             util.println($"ShrimpleCmd (Reborn)\nVersion: {ApplicationSettings.Version}\nBuild {ApplicationSettings.Build}");
-            util.println("Changes/Additions:\n Added commands version and exit.\n Fixed a few bugs.\n Added a read only configuration file check.\n Also added a boolean to config to control whether a prefix is needed or not.\n Technical Stuff:\n everything moved into a src\ folder\n changed the command processor to be more advanced than the last.");
+            util.println("Changes/Additions:\n Added commands version and exit.\n Fixed a few bugs.\n Added a read only configuration file check.\n Also added a boolean to config to control whether a prefix is needed or not.\n Technical Stuff:\n everything moved into a src\\ folder\n changed the command processor to be more advanced than the last.");
         }
 
         private static void ExitCommand(string[] args)
