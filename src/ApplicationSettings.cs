@@ -12,7 +12,7 @@ namespace ShrimpleCmd.dev
         public static string Version = "0.1.1a";
         public static string ExecutableLocation = AppDomain.CurrentDomain.BaseDirectory;
 
-        public static string Build = "0087";
+        public static string Build = "0088";
         public static string CurrentDirectory = Directory.GetCurrentDirectory();
 
         public static string ConfigLocation = Path.Combine(ExecutableLocation, "shrimple-settings.json");
