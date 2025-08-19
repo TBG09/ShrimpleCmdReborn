@@ -1,29 +1,229 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System.Diagnostics;
+
+// Assumed namespaces based on the user's provided code.
+// You may need to adjust these depending on your project's structure.
 using Newtonsoft.Json;
-using ShrimpleCmd.utils;
 using ShrimpleCmd.dev;
-using ShrimpleCmd.cli;
 using ShrimpleCmd.log;
+using ShrimpleCmd.utils;
 
 namespace ShrimpleCmd.cli.commands
 {
-    public class config
+    public class shrimple
     {
-        public enum actions
+        // HttpClient instance for making web requests.
+        private static readonly HttpClient _httpClient = new HttpClient();
+        // The GitHub API URL for fetching release information.
+        private const string GitHubApiUrl = "https://api.github.com/repos/TBG09/ShrimpleCmdReborn/releases";
+
+        public static async Task commandMain(string[] args)
         {
-            get,
-            set,
-            toggle,
-            reset,
-            list
+            // Skip the first argument if it's "shrimple" (the command name itself)
+            string[] actualArgs;
+            if (args.Length > 0 && args[0].ToLower() == "shrimple")
+            {
+                // Remove the "shrimple" command name and work with the subcommands
+                actualArgs = args.Skip(1).ToArray();
+            }
+            else
+            {
+                actualArgs = args;
+            }
+
+            if (actualArgs.Length == 0)
+            {
+                util.println("Usage: shrimple [command] [--prerelease] [version]");
+                util.println("Commands:");
+                util.println("  version - Show version information");
+                util.println("  update [--prerelease] [version] - Update ShrimpleCmd");
+                util.println("  config <action> [name] [value] - Manage configuration");
+                util.println("Be careful here as this isn't tested.");
+                return;
+            }
+
+            _httpClient.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ShrimpleCmd", "1.0"));
+
+            switch (actualArgs[0].ToLower())
+            {
+                case "version":
+                    await HandleVersionCommand();
+                    break;
+                case "update":
+                    await HandleUpdateCommand(actualArgs);
+                    break;
+                case "config":
+                    HandleConfigCommand(actualArgs);
+                    break;
+                default:
+                    util.println($"Unknown subcommand: {actualArgs[0]}");
+                    util.println("Available subcommands: version, update, config");
+                    break;
+            }
         }
 
-        public static void commandMain(string[] args)
-        
+        private static async Task HandleVersionCommand()
+        {
+            try
+            {
+                util.println(ApplicationSettings.ascii_icon);
+                util.println($"ShrimpleCmd (Reborn)\nVersion: {ApplicationSettings.Version}\nBuild {ApplicationSettings.Build}");
+                util.println(vars.versionChange);
+
+                var releases = await GetReleasesFromGitHub();
+                
+                if (releases.ValueKind != JsonValueKind.Array || !releases.EnumerateArray().Any())
+                {
+                    util.println("Latest version: Could not retrieve latest version from GitHub.");
+                    return;
+                }
+
+                var latestRelease = releases.EnumerateArray().FirstOrDefault(r => !r.GetProperty("prerelease").GetBoolean());
+                string latestVersion = latestRelease.ValueKind != JsonValueKind.Undefined
+                    ? latestRelease.GetProperty("tag_name").GetString()
+                    : "N/A";
+
+                util.println($"Latest version available: {latestVersion}");
+            }
+            catch (Exception ex)
+            {
+                util.println($"An error occurred while checking versions: {ex.Message}");
+            }
+        }
+
+        private static async Task HandleUpdateCommand(string[] args)
+        {
+            try
+            {
+                bool includePrerelease = args.Contains("--prerelease");
+                string targetVersion = args.FirstOrDefault(arg => !arg.StartsWith("--"));
+
+                var releases = await GetReleasesFromGitHub();
+                
+                if (releases.ValueKind != JsonValueKind.Array || !releases.EnumerateArray().Any())
+                {
+                    util.println("No proper releases found on GitHub.");
+                    return;
+                }
+
+                JsonElement selectedRelease;
+                if (!string.IsNullOrEmpty(targetVersion))
+                {
+                    // The fix: Use EnumerateArray() before calling FirstOrDefault
+                    selectedRelease = releases.EnumerateArray().FirstOrDefault(r => r.GetProperty("tag_name").GetString().Equals(targetVersion, StringComparison.OrdinalIgnoreCase));
+                    if (selectedRelease.ValueKind == JsonValueKind.Undefined)
+                    {
+                        util.println($"No release found with version '{targetVersion}'.");
+                        return;
+                    }
+                }
+                else if (includePrerelease)
+                {
+
+                    selectedRelease = releases.EnumerateArray().FirstOrDefault(r => r.GetProperty("prerelease").GetBoolean());
+                    if (selectedRelease.ValueKind == JsonValueKind.Undefined)
+                    {
+                        util.println("No prerelease found.");
+                        return;
+                    }
+                }
+                else
+                {
+
+                    selectedRelease = releases.EnumerateArray().FirstOrDefault(r => !r.GetProperty("prerelease").GetBoolean());
+                    if (selectedRelease.ValueKind == JsonValueKind.Undefined)
+                    {
+                        util.println("No proper release found.");
+                        return;
+                    }
+                }
+
+                util.println($"Found new version: {selectedRelease.GetProperty("tag_name").GetString()}");
+
+                string architectureString = RuntimeInformation.ProcessArchitecture switch
+                {
+                    Architecture.X64 => "x64",
+                    Architecture.X86 => "x86",
+                    _ => throw new PlatformNotSupportedException("Unsupported architecture.")
+                };
+
+                var asset = selectedRelease.GetProperty("assets").EnumerateArray()
+                    .FirstOrDefault(a => a.GetProperty("name").GetString().Contains(architectureString, StringComparison.OrdinalIgnoreCase));
+
+                if (asset.ValueKind == JsonValueKind.Undefined)
+                {
+                    util.println($"No update package found for {architectureString} architecture.");
+                    return;
+                }
+
+                string downloadUrl = asset.GetProperty("browser_download_url").GetString();
+                string tempDir = Path.Combine(Path.GetTempPath(), "ShrimpleCmd_Update");
+                string tempZipPath = Path.Combine(tempDir, "update.zip");
+
+                if (Directory.Exists(tempDir))
+                {
+                    Directory.Delete(tempDir, true);
+                }
+                Directory.CreateDirectory(tempDir);
+
+                util.println("Downloading update...");
+                await DownloadFileAsync(downloadUrl, tempZipPath);
+
+                util.println("Extracting files...");
+                ZipFile.ExtractToDirectory(tempZipPath, tempDir);
+
+                util.println("Update staged. Starting update process...");
+
+                string currentDir = AppDomain.CurrentDomain.BaseDirectory;
+                string scriptPath = Path.Combine(currentDir, "update_script.bat");
+
+                string scriptContent = $@"
+@echo off
+echo Waiting for ShrimpleCmd to close...
+timeout /t 5 >nul
+echo Copying new files...
+xcopy ""{tempDir}"" ""{currentDir}"" /s /e /y /h /k
+echo Cleaning up...
+rmdir ""{tempDir}"" /s /q
+echo Update complete. Relaunching...
+start ""{Process.GetCurrentProcess().ProcessName}"" ""{Assembly.GetEntryAssembly()?.Location}""
+exit
+";
+                File.WriteAllText(scriptPath, scriptContent);
+
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = scriptPath,
+                    Arguments = "",
+                    UseShellExecute = true,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+                Process.Start(startInfo);
+
+                Environment.Exit(0);
+            }
+            catch (PlatformNotSupportedException pex)
+            {
+                util.println(pex.Message);
+            }
+            catch (Exception ex)
+            {
+                util.println($"An error occurred during update: {ex.Message}");
+            }
+        }
+
+        // This method handles the 'config' command.
+        public static void HandleConfigCommand(string[] args)
         {
             Logger logger = new Logger("ConfigCommand", true, true);
             if (args.Length < 2)
@@ -32,8 +232,8 @@ namespace ShrimpleCmd.cli.commands
                 return;
             }
 
-            actions action;
-            if (!Enum.TryParse(args[1], true, out action))
+            // Enum for different config actions.
+            if (!Enum.TryParse(args[1], true, out actions action))
             {
                 util.println($"Invalid action: '{args[1]}'.");
                 return;
@@ -56,7 +256,7 @@ namespace ShrimpleCmd.cli.commands
                         util.println($"Error: Setting '{settingsName}' not found.");
                         return;
                     }
-                    util.println(ApplicationSettings.MainSettings.ConfigStuff[settingsName].ToString());
+                    util.println(ApplicationSettings.MainSettings.ConfigStuff[settingsName]?.ToString());
                     break;
 
                 case actions.set:
@@ -135,7 +335,7 @@ namespace ShrimpleCmd.cli.commands
                             util.println($"Error: '{settingsName}' does not map to a valid property.");
                             return;
                         }
-                        
+
                         PropertyInfo propertyInfo = ApplicationSettings.MainSettings.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
 
                         if (propertyInfo.PropertyType != typeof(bool))
@@ -256,6 +456,39 @@ namespace ShrimpleCmd.cli.commands
             }
         }
 
+        // Enum for different config actions.
+        public enum actions
+        {
+            get,
+            set,
+            toggle,
+            reset,
+            list
+        }
+
+        // Fetches all releases from GitHub.
+        private static async Task<JsonElement> GetReleasesFromGitHub()
+        {
+            var response = await _httpClient.GetStringAsync(GitHubApiUrl);
+            var jsonDoc = JsonDocument.Parse(response);
+            return jsonDoc.RootElement;
+        }
+
+        // Downloads a file from a URL to a specified path.
+        private static async Task DownloadFileAsync(string url, string destinationPath)
+        {
+            using (var response = await _httpClient.GetAsync(url))
+            {
+                response.EnsureSuccessStatusCode();
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                using (var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    await stream.CopyToAsync(fileStream);
+                }
+            }
+        }
+
+        // Retrieves the default value for a given setting name.
         private static object GetDefaultValue(string settingsName)
         {
             switch (settingsName.ToLower())
@@ -265,7 +498,7 @@ namespace ShrimpleCmd.cli.commands
                 case "core.internalcommandprefix": return "!";
                 case "core.enforceprefix": return true;
                 case "core.unicodeconversion": return true;
-                case "core.ShowLoggingOutput": return false;
+                case "core.showloggingoutput": return false;
                 case "cli.maxhistorylength": return 100;
                 case "cli.historyupkey": return (int)Settings.HistoryUp.UpArrow;
                 case "cli.historydownkey": return (int)Settings.HistoryDown.DownArrow;
@@ -273,6 +506,7 @@ namespace ShrimpleCmd.cli.commands
             }
         }
 
+        // Maps a user-friendly key to the actual property name.
         private static string GetPropertyNameFromKey(string settingsName)
         {
             switch (settingsName.ToLower())
@@ -282,7 +516,7 @@ namespace ShrimpleCmd.cli.commands
                 case "core.internalcommandprefix": return "internalCommandPrefix";
                 case "core.enforceprefix": return "enforcePrefix";
                 case "core.unicodeconversion": return "unicodeConversion";
-                case "core.ShowLoggingOutput": return "ShowLoggingOutput";
+                case "core.showloggingoutput": return "ShowLoggingOutput";
                 case "cli.maxhistorylength": return "MaxHistoryLength";
                 case "cli.historyupkey": return "HistoryUpKey";
                 case "cli.historydownkey": return "HistoryDownKey";

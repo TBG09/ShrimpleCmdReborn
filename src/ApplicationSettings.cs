@@ -9,15 +9,15 @@ namespace ShrimpleCmd.dev
     {
 
 
-        public static string Version = "0.0.1a";
+        public static string Version = "0.1.1a";
         public static string ExecutableLocation = AppDomain.CurrentDomain.BaseDirectory;
 
-        public static string Build = "0046";
+        public static string Build = "0087";
         public static string CurrentDirectory = Directory.GetCurrentDirectory();
 
-        public static string ConfigLocation = ExecutableLocation + "\\shrimple-settings.json";
+        public static string ConfigLocation = Path.Combine(ExecutableLocation, "shrimple-settings.json");
         public static string[] args;
-
+        public static Settings MainSettings;
         // Yes this is an application setting, it is NEEDED
         public static readonly string ascii_icon = @"
 
