@@ -38,7 +38,7 @@ cd ShrimpleCmdReborn
 dotnet build --configuration <configuration>
 ```
 
-It should be built to bin/<configuration>/ as ShrimpleCmd.exe(or as an elf depending on your platoform).
+It should be built to bin/<configuration>/ as ShrimpleCmd.exe(or as an elf depending on your platform).
 
 
 
